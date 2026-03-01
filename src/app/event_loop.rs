@@ -175,6 +175,13 @@ impl App {
             }
         }
 
+        // Reparse with mermaid-as-images now that the picker is configured.
+        // The initial parse used mermaid_as_images=false (before the picker
+        // was available), so mermaid blocks are still code blocks.
+        if model.should_render_mermaid_as_images() {
+            model.reflow_layout();
+        }
+
         // Pre-load images from the document
         let images_scope = crate::perf::scope("app.load_nearby_images.initial");
         model.load_nearby_images();
