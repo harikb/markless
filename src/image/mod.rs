@@ -86,19 +86,28 @@ pub fn create_picker(image_mode: Option<ImageMode>) -> Option<Picker> {
         return Some(Picker::halfblocks());
     }
 
-    // Try to create a picker, which will detect the terminal's capabilities
+    // Trust environment variables first (TERM_PROGRAM, KITTY_WINDOW_ID, etc.)
+    // since they are set by the terminal and are reliable. Only fall back to
+    // the stdio capability query for unknown terminals.
     #[cfg(unix)]
     {
+        let env_detected = detect_protocol();
+        if env_detected != ImageMode::Halfblock {
+            let protocol_type = image_mode_to_protocol_type(env_detected);
+            let mut picker = Picker::from_query_stdio_with_options(query_options())
+                .unwrap_or_else(|_| Picker::halfblocks());
+            picker.set_protocol_type(protocol_type);
+            crate::perf::log_event(
+                "image.create_picker",
+                format!("env detection={protocol_type:?}"),
+            );
+            return Some(picker);
+        }
+
         let picker = Picker::from_query_stdio_with_options(query_options()).ok()?;
         crate::perf::log_event(
             "image.create_picker",
-            format!(
-                "term_program={} term={} colorterm={} protocol={:?}",
-                std::env::var("TERM_PROGRAM").unwrap_or_else(|_| "<unset>".to_string()),
-                std::env::var("TERM").unwrap_or_else(|_| "<unset>".to_string()),
-                std::env::var("COLORTERM").unwrap_or_else(|_| "<unset>".to_string()),
-                picker.protocol_type()
-            ),
+            format!("stdio detection={:?}", picker.protocol_type()),
         );
         Some(picker)
     }
