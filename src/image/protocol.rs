@@ -32,7 +32,7 @@ pub fn detect_protocol() -> ImageMode {
 
     // Check for sixel support via TERM
     if let Ok(term) = env::var("TERM")
-        && (term.contains("sixel") || term == "xterm-256color" || term.contains("foot"))
+        && (term.contains("sixel") || term.contains("foot"))
     {
         return ImageMode::Sixel;
     }
