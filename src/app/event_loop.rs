@@ -146,6 +146,7 @@ impl App {
         let mut model =
             Model::new(effective_file, document, (size.width, size.height)).with_picker(picker);
         model.watch_enabled = self.watch_enabled;
+        model.mouse_enabled = self.mouse_enabled;
         model.toc_visible = toc_visible;
         model.image_mode = self.image_mode;
         model.images_enabled = self.images_enabled;
@@ -285,7 +286,7 @@ impl App {
                 }
                 watched_path.clone_from(&model.file_path);
             }
-            let should_enable_mouse = true;
+            let should_enable_mouse = model.mouse_enabled;
             if should_enable_mouse != mouse_capture_enabled {
                 if should_enable_mouse {
                     execute!(stdout(), EnableMouseCapture)?;

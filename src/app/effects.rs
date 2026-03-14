@@ -462,8 +462,10 @@ impl App {
         // Restore TUI (always, even on error)
         let _ = enable_raw_mode();
         let _ = execute!(stdout(), EnterAlternateScreen);
-        let _ = execute!(stdout(), EnableMouseCapture);
-        let _ = set_mouse_motion_tracking(true);
+        if model.mouse_enabled {
+            let _ = execute!(stdout(), EnableMouseCapture);
+            let _ = set_mouse_motion_tracking(true);
+        }
         model.needs_full_redraw = true;
 
         match result {
